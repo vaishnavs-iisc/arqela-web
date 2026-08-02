@@ -6,7 +6,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { Footer } from '@/components/Footer';
 
 export function LandingPage() {
-  const { isConfigured, signInWithGoogle } = useAuth();
+  const { signInWithGoogle } = useAuth();
   const handleSignIn = async () => {
     try {
       await signInWithGoogle();
@@ -31,8 +31,7 @@ export function LandingPage() {
           </div>
           <button
             onClick={handleSignIn}
-            disabled={!isConfigured}
-            className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold shadow-sm transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold shadow-sm transition hover:border-primary hover:text-primary cursor-pointer"
           >
             Sign in with Google
           </button>
@@ -53,17 +52,11 @@ export function LandingPage() {
             <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <button
                 onClick={handleSignIn}
-                disabled={!isConfigured}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-primary-hover cursor-pointer"
               >
                 Get Started with Google <ArrowRight className="h-4 w-4" />
               </button>
             </div>
-            {!isConfigured && (
-              <p className="mt-4 text-xs font-medium text-warning bg-warning/10 border border-warning/20 rounded-md p-2.5 max-w-md">
-                Environment setup: Add your Supabase keys to environment variables to enable Google authentication.
-              </p>
-            )}
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-2">
