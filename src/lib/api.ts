@@ -1,17 +1,17 @@
 /**
  * Typed API client — all fetch() calls live here and nowhere else.
- * Uses NEXT_PUBLIC_API_BASE env var with a localhost fallback for local dev.
+ * Checks both NEXT_PUBLIC_API_URL and NEXT_PUBLIC_API_BASE with a localhost fallback.
  */
 
 import type { EvaluationDetail, EvaluationRecord } from '@/types/hypothesis';
 import { supabase } from '@/lib/supabase';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000').replace(/\/$/, '');
 
 async function authHeaders(): Promise<HeadersInit> {
   if (!supabase) throw new Error('Sign-in has not been configured.');
   const { data } = await supabase.auth.getSession();
-  if (!data.session?.access_token) throw new Error('You must sign in to access your research history.');
+  if (!data.session?.access_token) throw new Error('You must sign in to audit a hypothesis.');
   return { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` };
 }
 

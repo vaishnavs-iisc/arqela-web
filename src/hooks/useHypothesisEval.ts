@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { evaluateHypothesis } from '@/lib/api';
-import type { EvaluationDetail, ChatMessage } from '@/types/hypothesis';
+import type { EvaluationDetail } from '@/types/hypothesis';
 
 interface UseHypothesisEvalReturn {
   isLoading: boolean;
@@ -37,7 +37,15 @@ export function useHypothesisEval(): UseHypothesisEvalReturn {
     try {
       const response = await evaluateHypothesis(hypothesis, domain);
 
-      if (!response.ok || !response.body) {
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert(`Evaluation request failed (${response.status}): ${errorText || 'Server error'}`);
+        onError();
+        return;
+      }
+
+      if (!response.body) {
+        alert('Server response stream unavailable.');
         onError();
         return;
       }
@@ -66,6 +74,7 @@ export function useHypothesisEval(): UseHypothesisEvalReturn {
             } else if (parsed.type === 'result') {
               onResult(parsed.data as EvaluationDetail);
             } else if (parsed.type === 'error') {
+              alert(`Evaluation error: ${parsed.message || 'Processing error'}`);
               onError();
             }
           } catch {
@@ -73,7 +82,8 @@ export function useHypothesisEval(): UseHypothesisEvalReturn {
           }
         }
       }
-    } catch {
+    } catch (err: any) {
+      alert(`Connection error: ${err?.message || 'Could not connect to backend service.'}`);
       onError();
     } finally {
       setIsLoading(false);
