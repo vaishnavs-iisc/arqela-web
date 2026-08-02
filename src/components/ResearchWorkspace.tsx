@@ -227,7 +227,7 @@ export function ResearchWorkspace() {
                         isChatLoading={isChatLoading}
                         chatEndRef={chatEndRef}
                         onInputChange={setChatInput}
-                        onSubmit={e => handleSendMessage(e, activeId)}
+                        onSubmit={e => handleSendMessage(e, activeId || result?.conversation_id || null)}
                       />
                     </div>
                   </div>
