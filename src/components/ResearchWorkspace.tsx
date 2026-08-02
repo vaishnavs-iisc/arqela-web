@@ -9,7 +9,6 @@ import { HypothesisForm } from '@/components/InputScreen/HypothesisForm';
 import { LoadingScreen } from '@/components/Workspace/LoadingScreen';
 import { ReportPanel } from '@/components/Workspace/ReportPanel';
 import { ChatPanel } from '@/components/Workspace/ChatPanel';
-import { Footer } from '@/components/Footer';
 import { useHypothesisEval } from '@/hooks/useHypothesisEval';
 import { useHistory } from '@/hooks/useHistory';
 import { useChat } from '@/hooks/useChat';
@@ -156,18 +155,15 @@ export function ResearchWorkspace() {
 
         {/* Input Screen */}
         {screen === 'input' && (
-          <div className="flex-1 flex flex-col overflow-y-auto">
-            <div className="flex-1 flex items-center justify-center p-6 md:p-12">
-              <HypothesisForm
-                hypothesis={hypothesisInput}
-                domain={domainInput}
-                isLoading={isLoading}
-                onHypothesisChange={setHypothesisInput}
-                onDomainChange={setDomainInput}
-                onSubmit={handleSubmit}
-              />
-            </div>
-            <Footer />
+          <div className="flex-1 flex flex-col overflow-y-auto items-center justify-center p-6 md:p-12">
+            <HypothesisForm
+              hypothesis={hypothesisInput}
+              domain={domainInput}
+              isLoading={isLoading}
+              onHypothesisChange={setHypothesisInput}
+              onDomainChange={setDomainInput}
+              onSubmit={handleSubmit}
+            />
           </div>
         )}
 
