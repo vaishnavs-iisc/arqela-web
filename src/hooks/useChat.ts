@@ -32,7 +32,12 @@ export function useChat(): UseChatReturn {
     async (e: React.FormEvent, conversationId: string | null) => {
       e.preventDefault();
       const userMsg = chatInput.trim();
-      if (!userMsg || isChatLoading || !conversationId) return;
+      if (!userMsg || isChatLoading) return;
+
+      if (!conversationId) {
+        alert('Active hypothesis evaluation ID is loading. Please try sending again in a moment.');
+        return;
+      }
 
       setChatInput('');
       setChatHistory(prev => [...prev, { role: 'user', content: userMsg }]);
