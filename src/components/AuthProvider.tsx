@@ -37,12 +37,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
-    if (!supabase) return;
+    if (!supabase) {
+      alert('Authentication configuration is missing. Please verify NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your Vercel project environment variables.');
+      return;
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
     });
-    if (error) throw error;
+    if (error) {
+      console.error('Google Sign-In Error:', error);
+      alert(`Google Sign-In failed: ${error.message}`);
+    }
   };
 
   const signOut = async () => {
