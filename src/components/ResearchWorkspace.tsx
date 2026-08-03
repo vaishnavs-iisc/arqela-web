@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { FileText, MessageSquare, X } from 'lucide-react';
 import { AppHeader } from '@/components/AppHeader';
 import { HistorySidebar } from '@/components/HistorySidebar';
@@ -18,10 +18,109 @@ type Screen = 'input' | 'workspace';
 type MobileTab = 'report' | 'chat';
 const DEFAULT_DOMAIN = 'Biology';
 
+function LiveAgentProgress({ progress, message, logs }: { progress: number; message: string; logs: string[] }) {
+  const steps = [
+    { name: 'Theory Analyst', desc: 'Deconstructing core claims & causal assumptions', activePct: [0, 25] },
+    { name: 'Proponent Agent', desc: 'Searching academic literature for supporting evidence', activePct: [26, 50] },
+    { name: 'Skeptic Auditor', desc: 'Auditing counter-arguments, biases & confounders', activePct: [51, 75] },
+    { name: 'Scientific Arbiter', desc: 'Synthesising consensus & drafting validation protocol', activePct: [76, 100] },
+  ];
+
+  return (
+    <div className="h-full flex-1 flex flex-col bg-card border-l border-border overflow-hidden animate-fade-in">
+      {/* Header */}
+      <div className="p-4 border-b border-border bg-border-muted/50 shrink-0">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          </span>
+          Multi-Agent Audit Status
+        </h3>
+      </div>
+
+      {/* Progress Dashboard */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col justify-center max-w-md mx-auto w-full">
+        {/* Large Progress Circle or Bar */}
+        <div className="text-center space-y-2">
+          <div className="text-4xl font-extrabold text-primary font-mono tracking-tighter">
+            {progress}%
+          </div>
+          <div className="text-[11px] font-semibold text-foreground/80 max-w-xs mx-auto animate-pulse">
+            {message}
+          </div>
+          <div className="w-full max-w-sm mx-auto bg-primary/10 border border-primary/10 h-2.5 rounded-full overflow-hidden mt-3">
+            <div
+              className="bg-primary h-full transition-all duration-500 rounded-full"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Steps Checklist */}
+        <div className="space-y-3 bg-background/40 border border-border p-4 rounded-xl shadow-sm">
+          {steps.map((step, idx) => {
+            const isCompleted = progress > step.activePct[1];
+            const isActive = progress >= step.activePct[0] && progress <= step.activePct[1];
+            return (
+              <div
+                key={idx}
+                className={`flex items-start gap-3 p-2 rounded-lg transition-all duration-300 border ${
+                  isActive
+                    ? 'bg-primary/5 border-primary/20 shadow-xs'
+                    : 'opacity-65 border-transparent'
+                }`}
+              >
+                <div className="mt-0.5">
+                  {isCompleted ? (
+                    <span className="flex items-center justify-center w-4.5 h-4.5 rounded-full bg-primary text-background text-[9px] font-bold">✓</span>
+                  ) : isActive ? (
+                    <span className="flex items-center justify-center w-4.5 h-4.5 rounded-full border-2 border-primary border-t-transparent animate-spin text-[8px]" />
+                  ) : (
+                    <span className="flex items-center justify-center w-4.5 h-4.5 rounded-full border border-border text-[9px] font-mono text-foreground/50">{idx + 1}</span>
+                  )}
+                </div>
+                <div>
+                  <div className={`text-xs font-bold ${isActive ? 'text-primary' : 'text-foreground/90'}`}>
+                    {step.name}
+                  </div>
+                  <div className="text-[10px] text-foreground/60 leading-relaxed mt-0.5">
+                    {step.desc}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Live Logs Console */}
+        {logs && logs.length > 0 && (
+          <div className="h-[120px] max-h-[120px] border border-border bg-black/5 rounded-xl p-3.5 font-mono text-[9px] leading-normal text-foreground/75 overflow-y-auto flex flex-col-reverse shadow-inner select-none">
+            <div className="space-y-1">
+              {logs.slice().reverse().map((log, idx) => (
+                <div key={idx} className="flex gap-1.5 items-start">
+                  <span className="text-primary select-none">&gt;</span>
+                  <span className="truncate">{log}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
 export function ResearchWorkspace() {
   const router = useRouter();
   const params = useParams<{ id?: string }>();
   const conversationId = params?.id;
+  const searchParams = useSearchParams();
+
+  const isNew = searchParams?.get('new') === 'true';
+  const queryHypothesis = searchParams?.get('q') || '';
+  const queryDomain = searchParams?.get('domain') || '';
 
   const [screen, setScreen] = useState<Screen>('input');
   const [mobileTab, setMobileTab] = useState<MobileTab>('report');
@@ -45,6 +144,36 @@ export function ResearchWorkspace() {
 
   useEffect(() => {
     if (!conversationId) return;
+
+    // Handle a new workflow redirect route
+    if (isNew && queryHypothesis) {
+      setScreen('workspace');
+      setResult(null);
+      setChatHistory([]);
+      setHypothesisInput(queryHypothesis);
+      setDomainInput(queryDomain || DEFAULT_DOMAIN);
+      setActiveId(conversationId);
+
+      // Clean the query parameters from the URL immediately so user gets clean view
+      const cleanUrl = `/conversations/${conversationId}`;
+      window.history.replaceState({ ...window.history.state, as: cleanUrl, url: cleanUrl }, '', cleanUrl);
+
+      handleEvaluate(
+        queryHypothesis,
+        queryDomain || DEFAULT_DOMAIN,
+        detail => {
+          setResult(detail);
+          if (detail.conversation_history?.length) {
+            setChatHistory(detail.conversation_history);
+          }
+          loadHistory();
+        },
+        () => setScreen('input'),
+        conversationId
+      );
+      return;
+    }
+
     // Bypass fetching from DB if we already have this conversation result in memory
     if (result && result.conversation_id === conversationId) return;
 
@@ -60,36 +189,16 @@ export function ResearchWorkspace() {
       setChatHistory(detail.conversation_history ?? []);
       setScreen('workspace');
     });
-  }, [conversationId, loadDetail, router, setChatHistory, result]);
+  }, [conversationId, isNew, queryHypothesis, queryDomain, loadDetail, router, setChatHistory, result, handleEvaluate, loadHistory]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!hypothesisInput.trim()) return;
-    setResult(null);
-    setChatHistory([]);
-    setScreen('workspace');
 
-    const tracker = { detail: null as EvaluationDetail | null };
-
-    await handleEvaluate(
-      hypothesisInput,
-      domainInput,
-      detail => {
-        tracker.detail = detail;
-        setResult(detail);
-        if (detail.conversation_history?.length) {
-          setChatHistory(detail.conversation_history);
-        }
-      },
-      () => setScreen('input')
+    const newId = crypto.randomUUID();
+    router.push(
+      `/conversations/${newId}?new=true&q=${encodeURIComponent(hypothesisInput)}&domain=${encodeURIComponent(domainInput)}`
     );
-
-    // Redirect to the conversation URL ONLY after the stream completes and it is saved in PostgreSQL
-    if (tracker.detail && tracker.detail.conversation_id) {
-      setActiveId(tracker.detail.conversation_id);
-      loadHistory();
-      router.push(`/conversations/${tracker.detail.conversation_id}`);
-    }
   };
 
   const handleSelectHistory = async (id: string) => {
@@ -188,22 +297,22 @@ export function ResearchWorkspace() {
                 <>
                   {/* Streaming Agent Status Banner */}
                   {isLoading && (
-                    <div className="bg-primary/10 border-b border-primary/20 px-4 py-2 flex items-center justify-between gap-4 shrink-0 animate-pulse text-[11px] font-semibold text-primary">
+                    <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-b border-primary/20 px-4 py-2.5 flex items-center justify-between gap-4 shrink-0 text-xs font-semibold text-primary shadow-xs">
                       <div className="flex items-center gap-2">
                         <span className="relative flex h-2 w-2">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                         </span>
-                        <span>{loadingLog}</span>
+                        <span className="tracking-wide">Arqela Multi-Agent Audit: {loadingLog}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-24 bg-primary/15 border border-primary/25 h-1.5 rounded-full overflow-hidden">
+                        <div className="w-32 bg-primary/20 border border-primary/30 h-2 rounded-full overflow-hidden shadow-inner">
                           <div
-                            className="bg-primary h-full transition-all duration-300"
+                            className="bg-primary h-full transition-all duration-300 rounded-full"
                             style={{ width: `${loadingProgress}%` }}
                           />
                         </div>
-                        <span className="font-mono text-[10px] tabular-nums">{loadingProgress}%</span>
+                        <span className="font-mono text-xs font-bold tabular-nums">{loadingProgress}%</span>
                       </div>
                     </div>
                   )}
@@ -228,7 +337,7 @@ export function ResearchWorkspace() {
                           : 'border-transparent text-foreground/60'
                       }`}
                     >
-                      <MessageSquare className="w-4 h-4" /> AI Copilot
+                      <MessageSquare className="w-4 h-4" /> {isLoading ? 'Audit Status' : 'AI Copilot'}
                     </button>
                   </div>
 
@@ -254,14 +363,22 @@ export function ResearchWorkspace() {
                         mobileTab === 'chat' ? 'flex' : 'hidden md:flex'
                       }`}
                     >
-                      <ChatPanel
-                        chatHistory={chatHistory}
-                        chatInput={chatInput}
-                        isChatLoading={isChatLoading}
-                        chatEndRef={chatEndRef}
-                        onInputChange={setChatInput}
-                        onSubmit={e => handleSendMessage(e, activeId || result?.conversation_id || null)}
-                      />
+                      {isLoading ? (
+                        <LiveAgentProgress
+                          progress={loadingProgress}
+                          message={loadingLog}
+                          logs={result?.agent_logs || []}
+                        />
+                      ) : (
+                        <ChatPanel
+                          chatHistory={chatHistory}
+                          chatInput={chatInput}
+                          isChatLoading={isChatLoading}
+                          chatEndRef={chatEndRef}
+                          onInputChange={setChatInput}
+                          onSubmit={e => handleSendMessage(e, activeId || result?.conversation_id || null)}
+                        />
+                      )}
                     </div>
                   </div>
                 </>

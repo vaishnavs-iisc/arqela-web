@@ -21,12 +21,13 @@ async function authHeaders(): Promise<HeadersInit> {
 
 export async function evaluateHypothesis(
   hypothesis: string,
-  domain: string
+  domain: string,
+  conversationId?: string
 ): Promise<Response> {
   return fetch(`${API_BASE}/api/hypothesis/evaluate`, {
     method: 'POST',
     headers: await authHeaders(),
-    body: JSON.stringify({ hypothesis, domain }),
+    body: JSON.stringify({ hypothesis, domain, conversation_id: conversationId }),
   });
 }
 

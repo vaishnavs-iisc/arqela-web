@@ -12,7 +12,8 @@ interface UseHypothesisEvalReturn {
     hypothesis: string,
     domain: string,
     onResult: (detail: EvaluationDetail) => void,
-    onError: () => void
+    onError: () => void,
+    conversationId?: string
   ) => Promise<void>;
 }
 
@@ -28,14 +29,15 @@ export function useHypothesisEval(): UseHypothesisEvalReturn {
     hypothesis: string,
     domain: string,
     onResult: (detail: EvaluationDetail) => void,
-    onError: () => void
+    onError: () => void,
+    conversationId?: string
   ) => {
     setIsLoading(true);
     setLoadingProgress(5);
     setLoadingLog('Deconstructing hypothesis structures...');
 
     try {
-      const response = await evaluateHypothesis(hypothesis, domain);
+      const response = await evaluateHypothesis(hypothesis, domain, conversationId);
 
       if (!response.ok) {
         const errorText = await response.text();
