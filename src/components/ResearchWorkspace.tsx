@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { FileText, MessageSquare, X } from 'lucide-react';
 import { AppHeader } from '@/components/AppHeader';
@@ -138,6 +138,8 @@ export function ResearchWorkspace() {
   const { history, loadHistory, loadDetail } = useHistory();
   const { chatHistory, chatInput, isChatLoading, chatEndRef, setChatHistory, setChatInput, handleSendMessage } = useChat();
 
+  const evaluationTriggeredRef = useRef<string | null>(null);
+
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
@@ -147,6 +149,9 @@ export function ResearchWorkspace() {
 
     // Handle a new workflow redirect route
     if (isNew && queryHypothesis) {
+      if (evaluationTriggeredRef.current === conversationId) return;
+      evaluationTriggeredRef.current = conversationId;
+
       setScreen('workspace');
       setResult(null);
       setChatHistory([]);
