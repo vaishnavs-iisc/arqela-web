@@ -170,11 +170,33 @@ export function ResearchWorkspace() {
         {/* Workspace Screen */}
         {screen === 'workspace' && (
           <div className="flex-1 flex flex-col overflow-hidden w-full h-full">
-            {isLoading && !result ? (
+            {isLoading && !result?.core_claim ? (
               <LoadingScreen progress={loadingProgress} message={loadingLog} />
             ) : (
               result && (
                 <>
+                  {/* Streaming Agent Status Banner */}
+                  {isLoading && (
+                    <div className="bg-primary/10 border-b border-primary/20 px-4 py-2 flex items-center justify-between gap-4 shrink-0 animate-pulse text-[11px] font-semibold text-primary">
+                      <div className="flex items-center gap-2">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                        </span>
+                        <span>{loadingLog}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-24 bg-primary/15 border border-primary/25 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-primary h-full transition-all duration-300"
+                            style={{ width: `${loadingProgress}%` }}
+                          />
+                        </div>
+                        <span className="font-mono text-[10px] tabular-nums">{loadingProgress}%</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Mobile Tab Navigation (<768px) */}
                   <div className="md:hidden flex border-b border-border bg-card shrink-0">
                     <button

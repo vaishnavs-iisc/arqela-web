@@ -71,6 +71,9 @@ export function useHypothesisEval(): UseHypothesisEvalReturn {
             if (parsed.type === 'progress') {
               setLoadingProgress(parsed.percentage);
               setLoadingLog(parsed.message);
+              if (parsed.partial_state) {
+                onResult(parsed.partial_state as EvaluationDetail);
+              }
             } else if (parsed.type === 'result') {
               onResult(parsed.data as EvaluationDetail);
             } else if (parsed.type === 'error') {
