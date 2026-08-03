@@ -28,10 +28,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setIsLoading(false);
+
+      if (typeof window !== 'undefined' && (window.location.hash.includes('access_token=') || window.location.hash.includes('refresh_token='))) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession);
       setIsLoading(false);
+
+      if (event === 'SIGNED_IN') {
+        if (typeof window !== 'undefined' && (window.location.hash.includes('access_token=') || window.location.hash.includes('refresh_token='))) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
