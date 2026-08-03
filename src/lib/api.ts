@@ -10,11 +10,15 @@ const isProd = typeof window !== 'undefined'
   ? window.location.hostname !== 'localhost'
   : process.env.NODE_ENV === 'production';
 
-const API_BASE = (
+let API_BASE = (
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.NEXT_PUBLIC_API_BASE ||
-  (isProd ? 'https://arqela-backend-525146764768.us-central1.run.app' : 'http://localhost:8000')
+  'http://localhost:8000'
 ).replace(/\/$/, '');
+
+if (isProd && (API_BASE.includes('localhost') || API_BASE.includes('127.0.0.1'))) {
+  API_BASE = 'https://arqela-backend-525146764768.us-central1.run.app';
+}
 
 async function authHeaders(): Promise<HeadersInit> {
   if (!supabase) throw new Error('Sign-in has not been configured.');
