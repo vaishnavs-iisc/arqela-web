@@ -6,7 +6,15 @@
 import type { EvaluationDetail, EvaluationRecord } from '@/types/hypothesis';
 import { supabase } from '@/lib/supabase';
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000').replace(/\/$/, '');
+const isProd = typeof window !== 'undefined'
+  ? window.location.hostname !== 'localhost'
+  : process.env.NODE_ENV === 'production';
+
+const API_BASE = (
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_API_BASE ||
+  (isProd ? 'https://arqela-backend-525146764768.us-central1.run.app' : 'http://localhost:8000')
+).replace(/\/$/, '');
 
 async function authHeaders(): Promise<HeadersInit> {
   if (!supabase) throw new Error('Sign-in has not been configured.');
