@@ -69,13 +69,13 @@ export function ResearchWorkspace() {
     setChatHistory([]);
     setScreen('workspace');
 
-    let latestDetail: EvaluationDetail | null = null;
+    const tracker = { detail: null as EvaluationDetail | null };
 
     await handleEvaluate(
       hypothesisInput,
       domainInput,
       detail => {
-        latestDetail = detail;
+        tracker.detail = detail;
         setResult(detail);
         if (detail.conversation_history?.length) {
           setChatHistory(detail.conversation_history);
@@ -85,10 +85,10 @@ export function ResearchWorkspace() {
     );
 
     // Redirect to the conversation URL ONLY after the stream completes and it is saved in PostgreSQL
-    if (latestDetail && latestDetail.conversation_id) {
-      setActiveId(latestDetail.conversation_id);
+    if (tracker.detail && tracker.detail.conversation_id) {
+      setActiveId(tracker.detail.conversation_id);
       loadHistory();
-      router.push(`/conversations/${latestDetail.conversation_id}`);
+      router.push(`/conversations/${tracker.detail.conversation_id}`);
     }
   };
 
