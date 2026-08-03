@@ -240,6 +240,7 @@ export function ResearchWorkspace() {
             isCollapsed={isHistoryCollapsed}
             onToggleCollapse={() => setIsHistoryCollapsed(v => !v)}
             onSelectRecord={handleSelectHistory}
+            onNewAudit={handleReset}
           />
         </div>
 
@@ -267,6 +268,7 @@ export function ResearchWorkspace() {
                   isCollapsed={false}
                   onToggleCollapse={() => setIsMobileDrawerOpen(false)}
                   onSelectRecord={handleSelectHistory}
+                  onNewAudit={handleReset}
                 />
               </div>
             </div>

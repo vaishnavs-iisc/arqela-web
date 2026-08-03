@@ -1,5 +1,5 @@
 import React from 'react';
-import { History, ChevronLeft, ChevronRight } from 'lucide-react';
+import { History, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import type { EvaluationRecord } from '@/types/hypothesis';
 
@@ -9,6 +9,7 @@ interface HistorySidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   onSelectRecord: (id: string) => void;
+  onNewAudit: () => void;
 }
 
 /**
@@ -21,6 +22,7 @@ export function HistorySidebar({
   isCollapsed,
   onToggleCollapse,
   onSelectRecord,
+  onNewAudit,
 }: HistorySidebarProps) {
   return (
     <aside
@@ -38,6 +40,15 @@ export function HistorySidebar({
           >
             <ChevronRight className="w-5 h-5" />
           </button>
+          
+          <button
+            onClick={onNewAudit}
+            className="p-1.5 hover:bg-primary/10 rounded-lg text-primary transition-all cursor-pointer border border-primary/20 bg-primary/5"
+            title="New Conversation"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+
           <div className="flex flex-col items-center gap-1.5 text-[9px] font-bold text-foreground/40 uppercase tracking-widest select-none pt-4 [writing-mode:vertical-lr] rotate-180">
             <History className="w-3.5 h-3.5 text-primary mb-2 -rotate-90" />
             Conversations
@@ -57,6 +68,17 @@ export function HistorySidebar({
               title="Collapse Conversations"
             >
               <ChevronLeft className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* New Conversation Button */}
+          <div className="px-3 pt-3 pb-1 shrink-0">
+            <button
+              onClick={onNewAudit}
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg border border-primary/25 bg-primary/5 hover:bg-primary/10 text-primary hover:text-primary font-bold text-xs transition-all shadow-xs cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              New Conversation
             </button>
           </div>
 
