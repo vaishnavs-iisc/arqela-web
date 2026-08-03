@@ -45,6 +45,9 @@ export function ResearchWorkspace() {
 
   useEffect(() => {
     if (!conversationId) return;
+    // Bypass fetching from DB if we already have this conversation result in memory
+    if (result && result.conversation_id === conversationId) return;
+
     loadDetail(conversationId).then(detail => {
       if (!detail) {
         router.replace('/');
@@ -57,7 +60,7 @@ export function ResearchWorkspace() {
       setChatHistory(detail.conversation_history ?? []);
       setScreen('workspace');
     });
-  }, [conversationId, loadDetail, router, setChatHistory]);
+  }, [conversationId, loadDetail, router, setChatHistory, result]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,20 +68,28 @@ export function ResearchWorkspace() {
     setResult(null);
     setChatHistory([]);
     setScreen('workspace');
+
+    let latestDetail: EvaluationDetail | null = null;
+
     await handleEvaluate(
       hypothesisInput,
       domainInput,
       detail => {
+        latestDetail = detail;
         setResult(detail);
-        if (detail.conversation_id) {
-          setActiveId(detail.conversation_id);
-          router.push(`/conversations/${detail.conversation_id}`);
+        if (detail.conversation_history?.length) {
+          setChatHistory(detail.conversation_history);
         }
-        if (detail.conversation_history?.length) setChatHistory(detail.conversation_history);
-        loadHistory();
       },
       () => setScreen('input')
     );
+
+    // Redirect to the conversation URL ONLY after the stream completes and it is saved in PostgreSQL
+    if (latestDetail && latestDetail.conversation_id) {
+      setActiveId(latestDetail.conversation_id);
+      loadHistory();
+      router.push(`/conversations/${latestDetail.conversation_id}`);
+    }
   };
 
   const handleSelectHistory = async (id: string) => {
