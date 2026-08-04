@@ -285,7 +285,9 @@ function RadialGauge({ score, max, label, tooltipText, colorClass }: RadialGauge
             fill="transparent"
           />
         </svg>
-        <span className="absolute text-[10px] font-black font-mono text-foreground">{score}</span>
+        <span className="absolute text-[8px] font-black font-mono text-foreground leading-none">
+          {score}<span className="text-[6.5px] text-foreground/45">/{max}</span>
+        </span>
       </div>
       <div className="mt-1.5 flex items-center justify-center gap-0.5">
         <span className="text-[8px] font-bold text-foreground/75 tracking-tight uppercase leading-none truncate max-w-[55px]" title={label}>
@@ -415,18 +417,29 @@ function CausalFlowchart({ chain }: { chain: string[] }) {
 
 function parseTimelineSteps(markdown: string): { title: string; content: string; checked: boolean }[] {
   if (!markdown) return [];
-  const lines = markdown.split('\n');
+
+  // Normalize single-paragraph layout if it contains Phase X: or Step X: inline
+  let normalized = markdown.trim();
+  if (normalized.match(/(Phase\s+\d+|Step\s+\d+|Phase\s+[A-Za-z]+|Step\s+[A-Za-z]+):/gi)) {
+    // Inject newlines before Phase X: or Step X: to split them cleanly, ensuring we don't double-inject at the very start
+    normalized = normalized.replace(/(Phase\s+\d+|Step\s+\d+|Phase\s+[A-Za-z]+|Step\s+[A-Za-z]+):/gi, '\n$1:').trim();
+  }
+
+  const lines = normalized.split('\n');
   const steps: { title: string; content: string; checked: boolean }[] = [];
 
   lines.forEach(line => {
     const trimmed = line.trim();
-    const match = trimmed.match(/^[-*\d.]+\s+(?:\*\*([^*]+)\*\*|([^:]+)):\s*(.*)$/);
+    if (!trimmed) return;
+
+    // Match "Phase 1: Description" or "- Phase 1: Description" or "**Phase 1**: Description" or "- **Phase 1**: Description"
+    const match = trimmed.match(/^(?:[-*\d.]+\s+)?(?:\*\*([^*]+)\*\*|([^:]+)):\s*(.*)$/);
     if (match) {
       const title = (match[1] || match[2]).trim();
       const content = match[3].trim();
       steps.push({ title, content, checked: false });
     } else {
-      const generalMatch = trimmed.match(/^[-*\d.]+\s+(.*)$/);
+      const generalMatch = trimmed.match(/^(?:[-*\d.]+\s+)?(.*)$/);
       if (generalMatch) {
         const text = generalMatch[1].trim();
         const colonIndex = text.indexOf(':');
@@ -435,13 +448,13 @@ function parseTimelineSteps(markdown: string): { title: string; content: string;
           const content = text.slice(colonIndex + 1).trim();
           steps.push({ title, content, checked: false });
         } else {
-          steps.push({ title: 'Procedure', content: text, checked: false });
+          steps.push({ title: 'Step', content: text, checked: false });
         }
       }
     }
   });
 
-  return steps;
+  return steps.filter(s => s.content.trim().length > 0);
 }
 
 function VerificationTimeline({ protocol }: { protocol: string }) {
