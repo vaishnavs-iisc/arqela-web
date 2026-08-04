@@ -115,7 +115,7 @@ function TabBar({ active, onTabChange, onCollapse }: TabBarProps) {
       </div>
       <button
         onClick={onCollapse}
-        className="text-foreground/40 hover:text-primary p-1.5 rounded transition-colors cursor-pointer ml-2"
+        className="hidden md:block text-foreground/40 hover:text-primary p-1.5 rounded transition-colors cursor-pointer ml-2"
         title="Collapse Report"
       >
         <ChevronLeft className="w-4 h-4" />
@@ -306,8 +306,8 @@ function RadialGauge({ score, max, label, tooltipText, colorClass }: RadialGauge
           {score}<span className="text-[7.5px] text-foreground/45">/{max}</span>
         </span>
       </div>
-      <div className="mt-1.5 flex items-center justify-center gap-0.5">
-        <span className="text-[8px] font-bold text-foreground/75 tracking-tight uppercase leading-none truncate max-w-[55px]" title={label}>
+      <div className="mt-1.5 flex flex-col items-center justify-center gap-0.5 min-h-[22px]">
+        <span className="text-[8px] font-bold text-foreground/75 tracking-tight uppercase leading-tight text-center" title={label}>
           {label}
         </span>
         <Tooltip text={tooltipText} />
@@ -675,7 +675,16 @@ export function ReportPanel({
 }: ReportPanelProps) {
   const [activeTab, setActiveTab] = React.useState<SideTab>('claims');
 
-  if (isCollapsed) {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (isCollapsed && !isMobile) {
     return (
       <div className="flex flex-col items-center py-4 space-y-4 h-full border-r border-border bg-card md:w-12 shrink-0">
         <button
