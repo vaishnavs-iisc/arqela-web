@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { FileText, MessageSquare, X } from 'lucide-react';
+import { FileText, MessageSquare, X, RefreshCw } from 'lucide-react';
 import { AppHeader } from '@/components/AppHeader';
 import { HistorySidebar } from '@/components/HistorySidebar';
 import { HypothesisForm } from '@/components/InputScreen/HypothesisForm';
@@ -122,7 +122,7 @@ export function ResearchWorkspace() {
   const queryHypothesis = searchParams?.get('q') || '';
   const queryDomain = searchParams?.get('domain') || '';
 
-  const [screen, setScreen] = useState<Screen>('input');
+  const [screen, setScreen] = useState<Screen>(conversationId ? 'workspace' : 'input');
   const [mobileTab, setMobileTab] = useState<MobileTab>('report');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
@@ -135,7 +135,7 @@ export function ResearchWorkspace() {
   const [isReportCollapsed, setIsReportCollapsed] = useState(false);
 
   const { isLoading, loadingLog, loadingProgress, handleEvaluate } = useHypothesisEval();
-  const { history, loadHistory, loadDetail } = useHistory();
+  const { history, isDetailLoading, loadHistory, loadDetail } = useHistory();
   const { chatHistory, chatInput, isChatLoading, chatEndRef, setChatHistory, setChatInput, handleSendMessage, sendDirectMessage } = useChat();
 
   const evaluationTriggeredRef = useRef<string | null>(null);
@@ -216,7 +216,13 @@ export function ResearchWorkspace() {
     setDomainInput(detail.academic_domain);
     setChatHistory(detail.conversation_history ?? []);
     setScreen('workspace');
-    router.push(`/conversations/${id}`);
+    
+    // Update browser URL instantly without Next.js page remount
+    window.history.pushState(
+      { ...window.history.state, as: `/conversations/${id}`, url: `/conversations/${id}` },
+      '',
+      `/conversations/${id}`
+    );
   };
 
   const handleReset = () => {
@@ -299,7 +305,12 @@ export function ResearchWorkspace() {
         {/* Workspace Screen */}
         {screen === 'workspace' && (
           <div className="flex-1 flex flex-col overflow-hidden w-full h-full">
-            {isLoading && !result?.core_claim ? (
+            {(!result && isDetailLoading) ? (
+              <div className="flex-1 flex flex-col items-center justify-center bg-card text-foreground">
+                <RefreshCw className="w-8 h-8 animate-spin text-primary mb-3" />
+                <span className="text-sm font-semibold text-foreground/60 animate-pulse">Loading Evaluation...</span>
+              </div>
+            ) : isLoading && !result?.core_claim ? (
               <LoadingScreen progress={loadingProgress} message={loadingLog} />
             ) : (
               result && (

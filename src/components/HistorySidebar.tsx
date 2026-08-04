@@ -98,9 +98,6 @@ export function HistorySidebar({
                 >
                   <div className="flex justify-between items-center mb-1">
                     <Badge variant="primary">{record.domain}</Badge>
-                    {record.vulnerability_score != null && (
-                      <Badge variant="muted">Vuln: {record.vulnerability_score}/5</Badge>
-                    )}
                   </div>
                   <p className="line-clamp-2 leading-relaxed text-foreground/90">{record.hypothesis}</p>
                 </button>
