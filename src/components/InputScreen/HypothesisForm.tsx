@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, HelpCircle } from 'lucide-react';
+import { Sparkles, HelpCircle, Paperclip, X } from 'lucide-react';
 
 const DOMAINS = [
   'Physics', 'Astrophysics', 'Chemistry', 'Biology', 'Neuroscience',
@@ -30,6 +30,14 @@ export function HypothesisForm({
   onDomainChange,
   onSubmit,
 }: HypothesisFormProps) {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(e);
+    setSelectedFile(null);
+  };
   return (
     <div className="w-full max-w-2xl bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
       <div className="space-y-1">
@@ -45,7 +53,7 @@ export function HypothesisForm({
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-5">
+      <form onSubmit={handleFormSubmit} className="space-y-5">
         {/* Domain selector */}
         <div>
           <label className="block text-xs font-semibold text-foreground/80 uppercase tracking-wider mb-2">
@@ -84,6 +92,41 @@ export function HypothesisForm({
             placeholder="Formulate your core scientific statement, mechanism, or claim..."
             className="w-full bg-background border border-border rounded-xl p-3.5 text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-foreground/40 resize-none leading-relaxed transition-all shadow-inner"
           />
+          {/* File picker */}
+          <div className="flex items-center justify-between border-t border-border pt-4 mt-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) setSelectedFile(file);
+                }}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-background border border-border hover:border-primary/50 text-foreground/80 hover:text-primary rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <Paperclip className="w-3.5 h-3.5" />
+                Attach Literature/Notes
+              </button>
+              {selectedFile && (
+                <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/5 border border-primary/20 text-primary text-xs rounded-lg font-medium">
+                  <Paperclip className="w-3 h-3" />
+                  <span className="max-w-[150px] truncate">{selectedFile.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFile(null)}
+                    className="ml-1 text-foreground/45 hover:text-danger cursor-pointer flex items-center justify-center"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Quick Example Chips */}

@@ -136,7 +136,7 @@ export function ResearchWorkspace() {
 
   const { isLoading, loadingLog, loadingProgress, handleEvaluate } = useHypothesisEval();
   const { history, loadHistory, loadDetail } = useHistory();
-  const { chatHistory, chatInput, isChatLoading, chatEndRef, setChatHistory, setChatInput, handleSendMessage } = useChat();
+  const { chatHistory, chatInput, isChatLoading, chatEndRef, setChatHistory, setChatInput, handleSendMessage, sendDirectMessage } = useChat();
 
   const evaluationTriggeredRef = useRef<string | null>(null);
 
@@ -362,6 +362,10 @@ export function ResearchWorkspace() {
                         isCollapsed={isReportCollapsed}
                         onCollapse={() => setIsReportCollapsed(true)}
                         onExpand={() => setIsReportCollapsed(false)}
+                        onAskQuestion={(text) => {
+                          setMobileTab('chat');
+                          sendDirectMessage(text, activeId || result?.conversation_id || null);
+                        }}
                       />
                     </div>
 

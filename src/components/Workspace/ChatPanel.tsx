@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, RefreshCw, Send } from 'lucide-react';
+import { MessageSquare, RefreshCw, Send, Paperclip, X } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import type { ChatMessage } from '@/types/hypothesis';
 
@@ -23,6 +23,14 @@ export function ChatPanel({
   onInputChange,
   onSubmit,
 }: ChatPanelProps) {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(e);
+    setSelectedFile(null);
+  };
   return (
     <aside className="bg-border-muted border-l border-border flex flex-col overflow-hidden h-full flex-1">
       {/* Header */}
@@ -61,24 +69,56 @@ export function ChatPanel({
       </div>
 
       {/* Input form */}
-      <form onSubmit={onSubmit} className="p-4 border-t border-border bg-card flex gap-2 shrink-0">
-        <input
-          id="chat-input"
-          type="text"
-          value={chatInput}
-          onChange={e => onInputChange(e.target.value)}
-          placeholder="Ask a question about the evidence or design…"
-          disabled={isChatLoading}
-          className="flex-1 bg-border-muted border border-border rounded-lg px-3 py-2.5 text-xs text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50 transition-all"
-        />
-        <button
-          id="chat-send-button"
-          type="submit"
-          disabled={isChatLoading || !chatInput.trim()}
-          className="bg-primary text-white hover:bg-primary-hover p-2.5 rounded-lg disabled:bg-border-muted disabled:text-foreground/40 transition-colors shrink-0 shadow-sm cursor-pointer"
-        >
-          <Send className="w-4 h-4" />
-        </button>
+      <form onSubmit={handleFormSubmit} className="p-4 border-t border-border bg-card flex flex-col gap-2 shrink-0">
+        {selectedFile && (
+          <div className="flex items-center gap-1 px-2.5 py-1 self-start bg-primary/5 border border-primary/20 text-primary text-[10px] rounded-lg font-medium">
+            <Paperclip className="w-3 h-3" />
+            <span className="max-w-[150px] truncate">{selectedFile.name}</span>
+            <button
+              type="button"
+              onClick={() => setSelectedFile(null)}
+              className="ml-1 text-foreground/45 hover:text-danger cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+        <div className="flex gap-2 w-full">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={e => {
+              const file = e.target.files?.[0];
+              if (file) setSelectedFile(file);
+            }}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="bg-background border border-border hover:border-primary/50 text-foreground/75 hover:text-primary p-2.5 rounded-lg transition-colors shrink-0 shadow-sm cursor-pointer"
+            title="Attach File"
+          >
+            <Paperclip className="w-4 h-4" />
+          </button>
+          <input
+            id="chat-input"
+            type="text"
+            value={chatInput}
+            onChange={e => onInputChange(e.target.value)}
+            placeholder="Ask a question about the evidence or design…"
+            disabled={isChatLoading}
+            className="flex-1 bg-border-muted border border-border rounded-lg px-3 py-2.5 text-xs text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50 transition-all"
+          />
+          <button
+            id="chat-send-button"
+            type="submit"
+            disabled={isChatLoading || !chatInput.trim()}
+            className="bg-primary text-white hover:bg-primary-hover p-2.5 rounded-lg disabled:bg-border-muted disabled:text-foreground/40 transition-colors shrink-0 shadow-sm cursor-pointer"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
       </form>
     </aside>
   );

@@ -12,6 +12,7 @@ interface UseChatReturn {
   setChatHistory: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   setChatInput: React.Dispatch<React.SetStateAction<string>>;
   handleSendMessage: (e: React.FormEvent, conversationId: string | null) => Promise<void>;
+  sendDirectMessage: (messageText: string, conversationId: string | null) => Promise<void>;
 }
 
 /**
@@ -101,6 +102,75 @@ export function useChat(): UseChatReturn {
     [chatInput, isChatLoading]
   );
 
+  const sendDirectMessage = useCallback(
+    async (messageText: string, conversationId: string | null) => {
+      const userMsg = messageText.trim();
+      if (!userMsg || isChatLoading) return;
+
+      if (!conversationId) {
+        return;
+      }
+
+      setChatHistory(prev => [...prev, { role: 'user', content: userMsg }]);
+      setIsChatLoading(true);
+
+      try {
+        const response = await sendChatMessage(conversationId, userMsg);
+
+        if (!response.ok || !response.body) {
+          setChatHistory(prev => [
+            ...prev,
+            { role: 'assistant', content: 'Connection issue. Please try again.' },
+          ]);
+          return;
+        }
+
+        setChatHistory(prev => [...prev, { role: 'assistant', content: '' }]);
+        setIsChatLoading(false);
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantReply = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunkText = decoder.decode(value, { stream: true });
+          for (const line of chunkText.split('\n')) {
+            if (!line.startsWith('data: ')) continue;
+            const raw = line.slice(6).trim();
+            if (!raw) continue;
+            try {
+              const data = JSON.parse(raw);
+              if (data.text) {
+                assistantReply += data.text;
+                setChatHistory(prev => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = {
+                    ...updated[updated.length - 1],
+                    content: assistantReply,
+                  };
+                  return updated;
+                });
+              }
+            } catch {
+              // skip
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Chat stream error:', err);
+        setChatHistory(prev => [
+          ...prev,
+          { role: 'assistant', content: 'The connection timed out. Please try again.' },
+        ]);
+      } finally {
+        setIsChatLoading(false);
+      }
+    },
+    [isChatLoading]
+  );
+
   return {
     chatHistory,
     chatInput,
@@ -109,5 +179,6 @@ export function useChat(): UseChatReturn {
     setChatHistory,
     setChatInput,
     handleSendMessage,
+    sendDirectMessage,
   };
 }

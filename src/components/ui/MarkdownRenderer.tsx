@@ -12,7 +12,7 @@ import React from 'react';
  */
 
 function parseInline(text: string): React.ReactNode[] {
-  const regex = /(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g;
+  const regex = /(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\)|\[[a-zA-Z0-9./_\-?&=%+#]+\])/g;
   const parts = text.split(regex);
 
   return parts.map((part, idx) => {
@@ -49,6 +49,25 @@ function parseInline(text: string): React.ReactNode[] {
           <span className="text-[10px]">↗</span>
         </a>
       );
+    }
+    if (part.startsWith('[') && part.endsWith(']')) {
+      const urlText = part.slice(1, -1).trim();
+      if (!urlText.includes(' ') && urlText.includes('.')) {
+        let url = urlText;
+        if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+        return (
+          <a
+            key={idx}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:text-primary-hover hover:underline font-semibold inline-flex items-center gap-0.5 decoration-primary/50 cursor-pointer"
+          >
+            {urlText}
+            <span className="text-[10px]">↗</span>
+          </a>
+        );
+      }
     }
     return part;
   });

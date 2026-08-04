@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   CheckCircle, AlertTriangle, BookOpen, ChevronRight,
-  ListOrdered, Beaker, ChevronLeft, Info, Cpu, GraduationCap, ArrowRight, FlaskConical
+  ListOrdered, Beaker, ChevronLeft, Info, Cpu, GraduationCap, ArrowRight, FlaskConical, MessageSquare
 } from 'lucide-react';
 import { ScoreBar } from '@/components/ui/ScoreBar';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
@@ -129,8 +129,10 @@ function TabBar({ active, onTabChange, onCollapse }: TabBarProps) {
 // ---------------------------------------------------------------------------
 interface ClaimsTabProps {
   result: EvaluationDetail;
+  onAskQuestion?: (text: string) => void;
+  onGoToEvidence: () => void;
 }
-function ClaimsTab({ result }: ClaimsTabProps) {
+function ClaimsTab({ result, onAskQuestion, onGoToEvidence }: ClaimsTabProps) {
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Multidimensional Evaluation Profile Grid */}
@@ -220,7 +222,7 @@ function ClaimsTab({ result }: ClaimsTabProps) {
       </div>
 
       {/* Causal Pathway Flowchart */}
-      <CausalFlowchart chain={result.causal_chain} />
+      <CausalFlowchart chain={result.causal_chain} onAskQuestion={onAskQuestion} />
 
       {/* Underlying Assumptions */}
       <div className="bg-card border border-border p-4 rounded-xl shadow-sm space-y-3">
@@ -233,7 +235,14 @@ function ClaimsTab({ result }: ClaimsTabProps) {
               <span className="text-[9px] font-black text-primary bg-primary/5 border border-primary/20 px-1.5 py-0.5 rounded-md mt-0.5">
                 {idx + 1}
               </span>
-              <p className="leading-relaxed text-foreground/80 font-medium">{ass}</p>
+              <p className="leading-relaxed text-foreground/80 font-medium flex-1">{ass}</p>
+              <button
+                onClick={() => onAskQuestion?.(`Can you analyze the validity and scientific literature around the assumption: "${ass}"?`)}
+                className="inline-flex items-center gap-1 text-[9px] font-bold text-primary hover:text-primary-hover bg-primary/5 hover:bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-lg transition-all cursor-pointer shrink-0 ml-2"
+                title="Ask Assistant to analyze this assumption"
+              >
+                <MessageSquare className="w-2.5 h-2.5" /> Ask AI
+              </button>
             </div>
           ))}
         </div>
@@ -241,6 +250,14 @@ function ClaimsTab({ result }: ClaimsTabProps) {
 
       {/* Proposed Verification Playbook Timeline */}
       <VerificationTimeline protocol={result.proposed_validation_protocol} />
+
+      {/* Deep-Dive to Evidence tab */}
+      <button
+        onClick={onGoToEvidence}
+        className="w-full flex items-center justify-center gap-1.5 py-3 text-xs font-bold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-xl transition-all cursor-pointer hover:shadow-xs"
+      >
+        Deep-Dive Evidence & Sources <ArrowRight className="w-4 h-4" />
+      </button>
     </div>
   );
 }
@@ -257,25 +274,25 @@ interface RadialGaugeProps {
 }
 
 function RadialGauge({ score, max, label, tooltipText, colorClass }: RadialGaugeProps) {
-  const radius = 18;
+  const radius = 20;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / max) * circumference;
 
   return (
     <div className="bg-card border border-border/80 rounded-xl p-2.5 flex flex-col items-center justify-between text-center relative group shadow-2xs hover:shadow-xs hover:border-primary/20 transition-all duration-300">
-      <div className="relative w-11 h-11 flex items-center justify-center">
-        <svg className="w-11 h-11 rotate-[-90deg]">
+      <div className="relative w-13 h-13 flex items-center justify-center">
+        <svg className="w-13 h-13 rotate-[-90deg]">
           <circle
-            cx="22"
-            cy="22"
+            cx="26"
+            cy="26"
             r={radius}
             className="stroke-border-muted"
             strokeWidth="3"
             fill="transparent"
           />
           <circle
-            cx="22"
-            cy="22"
+            cx="26"
+            cy="26"
             r={radius}
             className={`${colorClass} transition-all duration-500`}
             strokeWidth="3"
@@ -285,8 +302,8 @@ function RadialGauge({ score, max, label, tooltipText, colorClass }: RadialGauge
             fill="transparent"
           />
         </svg>
-        <span className="absolute text-[8px] font-black font-mono text-foreground leading-none">
-          {score}<span className="text-[6.5px] text-foreground/45">/{max}</span>
+        <span className="absolute text-[10px] font-black font-mono text-foreground leading-none">
+          {score}<span className="text-[7.5px] text-foreground/45">/{max}</span>
         </span>
       </div>
       <div className="mt-1.5 flex items-center justify-center gap-0.5">
@@ -353,7 +370,12 @@ function ConsensusGauge({ index }: { index: number }) {
   );
 }
 
-function CausalFlowchart({ chain }: { chain: string[] }) {
+interface CausalFlowchartProps {
+  chain: string[];
+  onAskQuestion?: (text: string) => void;
+}
+
+function CausalFlowchart({ chain, onAskQuestion }: CausalFlowchartProps) {
   if (!chain || chain.length === 0) return null;
 
   return (
@@ -399,9 +421,18 @@ function CausalFlowchart({ chain }: { chain: string[] }) {
                   <span className="text-[8px] font-mono font-bold tracking-wider text-foreground/45 uppercase">
                     Step {idx + 1}
                   </span>
-                  <span className={`text-[7px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${badgeColor}`}>
-                    {roleBadge}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => onAskQuestion?.(`Explain the causal mechanics, scientific literature, and mediator variables involved in step: "${step}"`)}
+                      className="inline-flex items-center gap-0.5 text-[8px] font-bold text-primary hover:text-primary-hover bg-primary/5 hover:bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-md transition-all cursor-pointer mr-1"
+                      title="Ask Assistant to explain this causal step"
+                    >
+                      <MessageSquare className="w-2 h-2" /> Ask AI
+                    </button>
+                    <span className={`text-[7px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${badgeColor}`}>
+                      {roleBadge}
+                    </span>
+                  </div>
                 </div>
                 <p className="text-xs leading-relaxed text-foreground/80 font-medium group-hover:text-foreground transition-colors">
                   {step}
@@ -497,14 +528,14 @@ function VerificationTimeline({ protocol }: { protocol: string }) {
         </span>
       </div>
 
-      <div className="relative pl-5 space-y-5 pt-1">
-        <div className="absolute top-2.5 bottom-2.5 left-2 w-0.5 bg-border" />
+      <div className="relative pl-6 space-y-5 pt-1">
+        <div className="absolute top-2.5 bottom-2.5 left-[7px] w-0.5 bg-border" />
         {steps.map((step, idx) => {
           return (
             <div key={idx} className="relative flex items-start gap-3 text-xs group">
               <button
                 onClick={() => toggleStep(idx)}
-                className={`absolute -left-[20.5px] w-2.5 h-2.5 rounded-full border flex items-center justify-center transition-all duration-300 z-10 cursor-pointer ${
+                className={`absolute left-[-21px] mt-0.5 w-2.5 h-2.5 rounded-full border flex items-center justify-center transition-all duration-300 z-10 cursor-pointer ${
                   step.checked
                     ? 'bg-success border-success text-white scale-110 shadow-xs'
                     : 'bg-card border-foreground/35 group-hover:border-primary group-hover:scale-105'
@@ -628,6 +659,7 @@ interface ReportPanelProps {
   isCollapsed: boolean;
   onCollapse: () => void;
   onExpand: () => void;
+  onAskQuestion?: (text: string) => void;
 }
 
 /**
@@ -639,6 +671,7 @@ export function ReportPanel({
   isCollapsed,
   onCollapse,
   onExpand,
+  onAskQuestion,
 }: ReportPanelProps) {
   const [activeTab, setActiveTab] = React.useState<SideTab>('claims');
 
@@ -664,7 +697,7 @@ export function ReportPanel({
     <main className="border-r border-border bg-card flex flex-col overflow-hidden h-full w-full md:w-[460px] shrink-0 transition-all duration-300">
       <TabBar active={activeTab} onTabChange={setActiveTab} onCollapse={onCollapse} />
       <div className="flex-1 overflow-y-auto p-4 bg-border-muted/40 space-y-4">
-        {activeTab === 'claims' && <ClaimsTab result={result} />}
+        {activeTab === 'claims' && <ClaimsTab result={result} onAskQuestion={onAskQuestion} onGoToEvidence={() => setActiveTab('evidence')} />}
         {activeTab === 'evidence' && <EvidenceTab result={result} chatHistory={chatHistory} />}
       </div>
     </main>
