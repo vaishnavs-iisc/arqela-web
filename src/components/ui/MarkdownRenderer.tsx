@@ -26,7 +26,12 @@ function parseInline(text: string): React.ReactNode[] {
     if (part.startsWith('[') && part.includes('](')) {
       const closeBracket = part.indexOf(']');
       const title = part.slice(1, closeBracket);
-      let url = part.slice(closeBracket + 2, -1).trim();
+      let url = part.slice(closeBracket + 2).trim();
+
+      if (url.endsWith(')')) {
+        url = url.slice(0, -1);
+      }
+      url = url.trim();
 
       // Filter non-URLs
       if (url.includes(' ') || !url.includes('.')) return part;
@@ -38,7 +43,7 @@ function parseInline(text: string): React.ReactNode[] {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary hover:text-primary-hover hover:underline font-semibold inline-flex items-center gap-0.5 decoration-primary/50"
+          className="text-primary hover:text-primary-hover hover:underline font-semibold inline-flex items-center gap-0.5 decoration-primary/50 cursor-pointer"
         >
           {title}
           <span className="text-[10px]">↗</span>

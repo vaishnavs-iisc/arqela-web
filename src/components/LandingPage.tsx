@@ -94,58 +94,6 @@ export function LandingPage() {
             />
           </div>
         </section>
-
-        {/* Recent Advancements Section */}
-        <section className="border-t border-border bg-border-muted/30 py-20 px-6">
-          <div className="mx-auto max-w-6xl space-y-12">
-            <div className="text-center space-y-4 max-w-2xl mx-auto">
-              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                The Frontier of Agentic Science
-              </h2>
-              <p className="text-base text-foreground/75 leading-relaxed">
-                Arqela is built on a rapidly accelerating global framework of AI-driven research. Leading laboratories and technology companies are redefining scientific discovery through autonomous agents.
-              </p>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {/* Sakana AI Card */}
-              <AdvancementCard
-                institution="Sakana AI"
-                tagline="The AI Scientist"
-                icon={<Cpu className="h-6 w-6 text-primary" />}
-                description="Developing the first fully autonomous system for scientific discovery, capable of generating ideas, writing code, running experiments, and writing academic papers."
-                link="https://sakana.ai"
-              />
-
-              {/* Google DeepMind Card */}
-              <AdvancementCard
-                institution="Google DeepMind"
-                tagline="AlphaFold & GNoME"
-                icon={<FlaskConical className="h-6 w-6 text-primary" />}
-                description="Unlocking protein structure predictions for all known biology and discovering millions of stable inorganic crystals, accelerating materials science by decades."
-                link="https://deepmind.google"
-              />
-
-              {/* Stanford & MIT Card */}
-              <AdvancementCard
-                institution="Stanford & MIT"
-                tagline="Agentic Biotech Labs"
-                icon={<GraduationCap className="h-6 w-6 text-primary" />}
-                description="Pioneering automated closed-loop systems that design physical assays, direct liquid-handling lab robots, and synthesize compound libraries autonomously."
-                link="https://stanford.edu"
-              />
-
-              {/* OpenAI & Anthropic Card */}
-              <AdvancementCard
-                institution="OpenAI & Anthropic"
-                tagline="Scientific Reasoning"
-                icon={<BookOpen className="h-6 w-6 text-primary" />}
-                description="Training large models with advanced multi-step logical chains to read entire research corpora, verify claims, and advise human researchers on complex studies."
-                link="https://openai.com"
-              />
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />
@@ -163,48 +111,6 @@ function Feature({ icon, title, text }: { icon: React.ReactNode; title: string; 
         <h3 className="text-base font-bold text-foreground tracking-tight">{title}</h3>
         <p className="mt-1 text-sm leading-relaxed text-foreground/75 font-medium">{text}</p>
       </div>
-    </div>
-  );
-}
-
-interface AdvancementCardProps {
-  institution: string;
-  tagline: string;
-  icon: React.ReactNode;
-  description: string;
-  link: string;
-}
-
-function AdvancementCard({ institution, tagline, icon, description, link }: AdvancementCardProps) {
-  return (
-    <div className="group rounded-2xl border border-border/80 bg-card/65 backdrop-blur-md p-6 shadow-xs hover:shadow-md hover:border-primary/30 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="p-2 rounded-xl bg-primary/5 transition-colors group-hover:bg-primary/10">
-            {icon}
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/5 px-2.5 py-1 rounded-full">
-            Research Node
-          </span>
-        </div>
-        <div className="space-y-1">
-          <h3 className="text-lg font-extrabold text-foreground group-hover:text-primary transition-colors">
-            {institution}
-          </h3>
-          <p className="text-xs font-bold text-secondary">{tagline}</p>
-        </div>
-        <p className="text-xs leading-relaxed text-foreground/75 font-medium">
-          {description}
-        </p>
-      </div>
-      <a 
-        href={link} 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="mt-6 inline-flex items-center gap-1 text-[11px] font-bold text-primary group-hover:text-primary-hover group-hover:gap-1.5 transition-all"
-      >
-        Explore Work <ArrowRight className="h-3.5 w-3.5" />
-      </a>
     </div>
   );
 }

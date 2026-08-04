@@ -39,6 +39,7 @@ export interface EvaluationDetail {
   scientific_consensus_index?: number;
   bias_vulnerability_score?: number;
   conversation_history?: ChatMessage[];
+  companies_and_labs?: string;
 }
 
 export interface ChatMessage {

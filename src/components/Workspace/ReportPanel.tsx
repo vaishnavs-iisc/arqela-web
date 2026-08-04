@@ -88,7 +88,7 @@ function StatRow({ label, value, tooltip, mono = false }: StatRowProps) {
 // ---------------------------------------------------------------------------
 // Tabs
 // ---------------------------------------------------------------------------
-type SideTab = 'claims' | 'evidence' | 'advancements';
+type SideTab = 'claims' | 'evidence';
 
 interface TabBarProps {
   active: SideTab;
@@ -99,17 +99,17 @@ function TabBar({ active, onTabChange, onCollapse }: TabBarProps) {
   return (
     <div className="flex border-b border-border bg-border-muted shrink-0 items-center justify-between pr-2">
       <div className="flex flex-1">
-        {(['claims', 'evidence', 'advancements'] as SideTab[]).map(tab => (
+        {(['claims', 'evidence'] as SideTab[]).map(tab => (
           <button
             key={tab}
             onClick={() => onTabChange(tab)}
-            className={`flex-1 py-3.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer ${
+            className={`flex-1 py-3.5 text-[10px] font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer ${
               active === tab
                 ? 'border-primary text-primary bg-card'
                 : 'border-transparent text-foreground/60 hover:text-foreground hover:bg-background/50'
             }`}
           >
-            {tab === 'claims' ? 'Vulnerability' : tab === 'evidence' ? 'Evidence & Sources' : 'AI Frontier'}
+            {tab === 'claims' ? 'Vulnerability' : 'Evidence & Sources'}
           </button>
         ))}
       </div>
@@ -277,7 +277,7 @@ function EvidenceTab({ result, chatHistory }: EvidenceTabProps) {
   const assistantMessages = chatHistory
     .filter(m => m.role === 'assistant')
     .map(m => m.content);
-  const refs = extractReferences(result.supporting_evidence, result.counter_evidence, ...assistantMessages);
+  const refs = extractReferences(result.supporting_evidence, result.counter_evidence, result.companies_and_labs || '', ...assistantMessages);
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -298,6 +298,17 @@ function EvidenceTab({ result, chatHistory }: EvidenceTabProps) {
         </div>
         <MarkdownRenderer text={result.counter_evidence} />
       </div>
+
+      {/* Active Labs, Companies & Recent Findings */}
+      {result.companies_and_labs && (
+        <div className="space-y-2.5 bg-card border border-border p-4 rounded-xl shadow-sm">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider pb-1.5 border-b border-border">
+            <Cpu className="w-3.5 h-3.5" />
+            Active Labs, Companies & Recent Findings
+          </div>
+          <MarkdownRenderer text={result.companies_and_labs} />
+        </div>
+      )}
 
       {/* Academic References */}
       <div className="space-y-4 bg-card border border-border p-4 rounded-xl shadow-sm">
@@ -381,99 +392,7 @@ export function ReportPanel({
       <div className="flex-1 overflow-y-auto p-4 bg-border-muted/40 space-y-4">
         {activeTab === 'claims' && <ClaimsTab result={result} />}
         {activeTab === 'evidence' && <EvidenceTab result={result} chatHistory={chatHistory} />}
-        {activeTab === 'advancements' && <AdvancementsTab />}
       </div>
     </main>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Advancements Tab Component
-// ---------------------------------------------------------------------------
-function AdvancementsTab() {
-  return (
-    <div className="space-y-4 animate-fade-in">
-      <div className="bg-card border border-border p-4 rounded-xl shadow-sm space-y-2">
-        <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider pb-1 border-b border-border/60 mb-2">
-          The Frontier of Agentic Science
-        </h4>
-        <p className="text-xs text-foreground/85 leading-relaxed font-light">
-          Arqela is built on a rapidly accelerating global framework of AI-driven research. Leading laboratories and technology companies are redefining scientific discovery through autonomous agents.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3">
-        <MiniAdvancementCard
-          institution="Sakana AI"
-          tagline="The AI Scientist"
-          icon={<Cpu className="h-4.5 w-4.5 text-primary" />}
-          description="Developing the first fully autonomous system for scientific discovery, capable of generating ideas, writing code, running experiments, and writing academic papers."
-          link="https://sakana.ai"
-        />
-        <MiniAdvancementCard
-          institution="Google DeepMind"
-          tagline="AlphaFold & GNoME"
-          icon={<FlaskConical className="h-4.5 w-4.5 text-primary" />}
-          description="Predicting protein structure for all known biology and discovering millions of stable crystals, accelerating materials science by decades."
-          link="https://deepmind.google"
-        />
-        <MiniAdvancementCard
-          institution="Stanford & MIT"
-          tagline="Agentic Biotech Labs"
-          icon={<GraduationCap className="h-4.5 w-4.5 text-primary" />}
-          description="Pioneering automated closed-loop systems that design physical assays, direct liquid-handling lab robots, and synthesize compound libraries autonomously."
-          link="https://stanford.edu"
-        />
-        <MiniAdvancementCard
-          institution="OpenAI & Anthropic"
-          tagline="Scientific Reasoning"
-          icon={<BookOpen className="h-4.5 w-4.5 text-primary" />}
-          description="Training large models with advanced multi-step logical chains to read entire research corpora, verify claims, and advise human researchers."
-          link="https://openai.com"
-        />
-      </div>
-    </div>
-  );
-}
-
-function MiniAdvancementCard({ institution, tagline, icon, description, link }: {
-  institution: string;
-  tagline: string;
-  icon: React.ReactNode;
-  description: string;
-  link: string;
-}) {
-  return (
-    <div className="group rounded-xl border border-border bg-card p-4 shadow-xs hover:shadow-sm hover:border-primary/30 transition-all duration-300 flex flex-col justify-between">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary/5 group-hover:bg-primary/10 transition-colors">
-              {icon}
-            </div>
-            <div>
-              <h5 className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
-                {institution}
-              </h5>
-              <p className="text-[9px] font-bold text-secondary">{tagline}</p>
-            </div>
-          </div>
-          <span className="text-[8px] font-bold uppercase tracking-wider text-primary bg-primary/5 px-2 py-0.5 rounded-full">
-            Active
-          </span>
-        </div>
-        <p className="text-[11px] leading-relaxed text-foreground/75 font-medium">
-          {description}
-        </p>
-      </div>
-      <a 
-        href={link} 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="mt-3 inline-flex items-center gap-1 text-[9px] font-bold text-primary group-hover:text-primary-hover group-hover:gap-1.5 transition-all"
-      >
-        Explore Work <ArrowRight className="w-3.5 h-3.5" />
-      </a>
-    </div>
   );
 }
