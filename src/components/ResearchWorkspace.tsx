@@ -282,15 +282,17 @@ export function ResearchWorkspace() {
 
         {/* Input Screen */}
         {screen === 'input' && (
-          <div className="flex-1 flex flex-col overflow-y-auto items-center justify-center p-6 md:p-12">
-            <HypothesisForm
-              hypothesis={hypothesisInput}
-              domain={domainInput}
-              isLoading={isLoading}
-              onHypothesisChange={setHypothesisInput}
-              onDomainChange={setDomainInput}
-              onSubmit={handleSubmit}
-            />
+          <div className="flex-1 flex flex-col overflow-y-auto items-center justify-start p-6 md:p-12">
+            <div className="my-auto w-full flex justify-center">
+              <HypothesisForm
+                hypothesis={hypothesisInput}
+                domain={domainInput}
+                isLoading={isLoading}
+                onHypothesisChange={setHypothesisInput}
+                onDomainChange={setDomainInput}
+                onSubmit={handleSubmit}
+              />
+            </div>
           </div>
         )}
 
