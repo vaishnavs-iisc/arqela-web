@@ -43,10 +43,10 @@ function parseInline(text: string): React.ReactNode[] {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary hover:text-primary-hover hover:underline font-semibold inline-flex items-center gap-0.5 decoration-primary/50 cursor-pointer"
+          className="text-primary hover:text-primary-hover hover:underline font-semibold inline-flex max-w-full flex-wrap items-center gap-0.5 decoration-primary/50 cursor-pointer break-all [overflow-wrap:anywhere]"
         >
-          {title}
-          <span className="text-[10px]">↗</span>
+          <span className="break-all [overflow-wrap:anywhere]">{title}</span>
+          <span className="text-[10px] shrink-0">↗</span>
         </a>
       );
     }
@@ -61,10 +61,10 @@ function parseInline(text: string): React.ReactNode[] {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary hover:text-primary-hover hover:underline font-semibold inline-flex items-center gap-0.5 decoration-primary/50 cursor-pointer"
+            className="text-primary hover:text-primary-hover hover:underline font-semibold inline-flex max-w-full flex-wrap items-center gap-0.5 decoration-primary/50 cursor-pointer break-all [overflow-wrap:anywhere]"
           >
-            {urlText}
-            <span className="text-[10px]">↗</span>
+            <span className="break-all [overflow-wrap:anywhere]">{urlText}</span>
+            <span className="text-[10px] shrink-0">↗</span>
           </a>
         );
       }
@@ -86,16 +86,16 @@ export function MarkdownRenderer({ text }: MarkdownRendererProps) {
     .replace(/^#\s+/gm, '');
 
   return (
-    <div className="space-y-2 text-xs text-foreground/85 leading-relaxed">
+    <div className="space-y-2 text-xs text-foreground/85 leading-relaxed break-words [overflow-wrap:anywhere] min-w-0">
       {cleanText.split('\n').map((line, idx) => {
         const trimmed = line.trim();
         if (!trimmed) return <div key={idx} className="h-1" />;
 
         if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
           return (
-            <div key={idx} className="flex items-start gap-2 pl-1.5">
+            <div key={idx} className="flex items-start gap-2 pl-1.5 min-w-0">
               <span className="mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full bg-primary" />
-              <div className="flex-1">{parseInline(trimmed.replace(/^[-*]\s+/, ''))}</div>
+              <div className="flex-1 min-w-0 break-words [overflow-wrap:anywhere]">{parseInline(trimmed.replace(/^[-*]\s+/, ''))}</div>
             </div>
           );
         }
@@ -103,14 +103,14 @@ export function MarkdownRenderer({ text }: MarkdownRendererProps) {
         if (/^\d+\.\s+/.test(trimmed)) {
           const num = trimmed.match(/^\d+/)?.[0] ?? '1';
           return (
-            <div key={idx} className="flex items-start gap-2 pl-1.5">
+            <div key={idx} className="flex items-start gap-2 pl-1.5 min-w-0">
               <span className="text-primary font-mono text-xs font-bold shrink-0">{num}.</span>
-              <div className="flex-1">{parseInline(trimmed.replace(/^\d+\.\s+/, ''))}</div>
+              <div className="flex-1 min-w-0 break-words [overflow-wrap:anywhere]">{parseInline(trimmed.replace(/^\d+\.\s+/, ''))}</div>
             </div>
           );
         }
 
-        return <p key={idx}>{parseInline(trimmed)}</p>;
+        return <p key={idx} className="break-words [overflow-wrap:anywhere] min-w-0">{parseInline(trimmed)}</p>;
       })}
     </div>
   );

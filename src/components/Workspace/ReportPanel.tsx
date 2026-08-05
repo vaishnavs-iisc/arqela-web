@@ -585,20 +585,20 @@ function EvidenceTab({ result, chatHistory }: EvidenceTabProps) {
   const refs = extractReferences(result.supporting_evidence, result.counter_evidence, result.companies_and_labs || '', ...assistantMessages);
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-fade-in min-w-0">
       {/* Supporting Evidence */}
-      <div className="space-y-2.5 bg-card border border-border border-l-4 border-l-success p-4 rounded-xl shadow-sm">
+      <div className="space-y-2.5 bg-card border border-border border-l-4 border-l-success p-4 rounded-xl shadow-sm min-w-0 break-words">
         <div className="flex items-center gap-1.5 text-xs font-bold text-success uppercase tracking-wider pb-1.5 border-b border-border">
-          <CheckCircle className="w-3.5 h-3.5 text-success animate-pulse" />
+          <CheckCircle className="w-3.5 h-3.5 text-success animate-pulse shrink-0" />
           Supporting Evidence
         </div>
         <MarkdownRenderer text={result.supporting_evidence} />
       </div>
 
       {/* Counter Evidence */}
-      <div className="space-y-2.5 bg-card border border-border border-l-4 border-l-danger p-4 rounded-xl shadow-sm">
+      <div className="space-y-2.5 bg-card border border-border border-l-4 border-l-danger p-4 rounded-xl shadow-sm min-w-0 break-words">
         <div className="flex items-center gap-1.5 text-xs font-bold text-danger uppercase tracking-wider pb-1.5 border-b border-border">
-          <AlertTriangle className="w-3.5 h-3.5 text-danger" />
+          <AlertTriangle className="w-3.5 h-3.5 text-danger shrink-0" />
           Counterarguments & Gaps
         </div>
         <MarkdownRenderer text={result.counter_evidence} />
@@ -606,9 +606,9 @@ function EvidenceTab({ result, chatHistory }: EvidenceTabProps) {
 
       {/* Active Labs, Companies & Recent Findings */}
       {result.companies_and_labs && (
-        <div className="space-y-2.5 bg-card border border-border border-l-4 border-l-primary p-4 rounded-xl shadow-sm">
+        <div className="space-y-2.5 bg-card border border-border border-l-4 border-l-primary p-4 rounded-xl shadow-sm min-w-0 break-words">
           <div className="flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider pb-1.5 border-b border-border">
-            <Cpu className="w-3.5 h-3.5 text-primary" />
+            <Cpu className="w-3.5 h-3.5 text-primary shrink-0" />
             Active Labs, Companies & Recent Findings
           </div>
           <MarkdownRenderer text={result.companies_and_labs} />
@@ -616,9 +616,9 @@ function EvidenceTab({ result, chatHistory }: EvidenceTabProps) {
       )}
 
       {/* Academic References */}
-      <div className="space-y-4 bg-card border border-border p-4 rounded-xl shadow-sm">
+      <div className="space-y-4 bg-card border border-border p-4 rounded-xl shadow-sm min-w-0 break-words">
         <div className="flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider pb-1.5 border-b border-border mb-2">
-          <BookOpen className="w-3.5 h-3.5" />
+          <BookOpen className="w-3.5 h-3.5 shrink-0" />
           Academic References & Sources
         </div>
         {refs.length === 0 ? (
@@ -626,19 +626,20 @@ function EvidenceTab({ result, chatHistory }: EvidenceTabProps) {
             No academic citations yet. Ask the assistant to look up papers!
           </p>
         ) : (
-          <div className="space-y-2.5 max-h-[250px] overflow-y-auto pr-1">
+          <div className="space-y-2.5 max-h-[250px] overflow-y-auto pr-1 min-w-0">
             {refs.map((ref, idx) => (
-              <div key={idx} className="flex gap-2.5 items-start text-xs border-b border-background pb-2.5 last:border-b-0 last:pb-0 group">
-                <span className="text-primary font-mono font-bold">[{idx + 1}]</span>
-                <div className="flex-1 space-y-0.5">
-                  <h5 className="font-semibold text-foreground/85 leading-snug group-hover:text-primary transition-colors">{ref.title}</h5>
+              <div key={idx} className="flex gap-2.5 items-start text-xs border-b border-background pb-2.5 last:border-b-0 last:pb-0 group min-w-0">
+                <span className="text-primary font-mono font-bold shrink-0">[{idx + 1}]</span>
+                <div className="flex-1 space-y-0.5 min-w-0">
+                  <h5 className="font-semibold text-foreground/85 leading-snug group-hover:text-primary transition-colors break-words">{ref.title}</h5>
                   <a
                     href={ref.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:text-primary-hover hover:underline text-[10px] break-all inline-flex items-center gap-0.5 cursor-pointer"
+                    className="text-primary hover:text-primary-hover hover:underline text-[10px] break-all [overflow-wrap:anywhere] inline-flex max-w-full flex-wrap items-center gap-0.5 cursor-pointer"
                   >
-                    {ref.url}<span className="text-[9px]">↗</span>
+                    <span className="break-all [overflow-wrap:anywhere]">{ref.url}</span>
+                    <span className="text-[9px] shrink-0">↗</span>
                   </a>
                 </div>
               </div>
